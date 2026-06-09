@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>MFH Gewerkebewertung</title>
+<title>Urlaubsfinder</title>
 
 <style>
 * { box-sizing: border-box; }
@@ -17,241 +16,274 @@ body {
   color: #1c1c1e;
 }
 
-h1 {
-  font-size: 26px;
-  margin: 10px 0 4px;
-}
+h1 { font-size: 28px; margin-bottom: 4px; }
 
-.subtitle {
-  color: #666;
-  margin-bottom: 16px;
-}
+.subtitle { color: #666; margin-bottom: 16px; }
 
 .card {
   background: white;
   border-radius: 18px;
-  padding: 16px;
+  padding: 18px;
   margin-bottom: 14px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
-.gewerk-title {
-  font-size: 20px;
+label {
+  font-size: 18px;
   font-weight: 700;
-  margin-bottom: 12px;
 }
 
-.buttons {
+.value {
+  float: right;
+  color: #007aff;
+}
+
+input[type="range"] {
+  width: 100%;
+  margin: 16px 0;
+  accent-color: #007aff;
+}
+
+.checkbox-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-button {
-  min-height: 48px;
-  border: none;
-  border-radius: 14px;
-  font-size: 16px;
-  font-weight: 600;
-  background: #e5e5ea;
-}
-
-button.active.okay { background: #34c759; color: white; }
-button.active.mittel { background: #ffcc00; color: #1c1c1e; }
-button.active.muss { background: #ff9500; color: white; }
-button.active.dringend { background: #ff3b30; color: white; }
-
-textarea {
-  width: 100%;
-  min-height: 70px;
-  margin-top: 12px;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  font-size: 16px;
-  font-family: inherit;
-}
-
-.summary {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: #007aff;
-  color: white;
-  border-radius: 18px;
-  padding: 14px;
-  margin-bottom: 16px;
-}
-
-.summary div {
-  margin: 4px 0;
-}
-
-.action {
-  width: 100%;
-  background: #007aff;
-  color: white;
+  gap: 12px;
   margin-top: 10px;
 }
 
-.clear {
-  background: #8e8e93;
+.checkbox-grid label {
+  font-size: 17px;
+  font-weight: 600;
+  background: #f2f2f7;
+  padding: 12px;
+  border-radius: 14px;
+}
+
+input[type="checkbox"] {
+  transform: scale(1.3);
+  margin-right: 8px;
+}
+
+.result {
+  background: #007aff;
+  color: white;
+  border-radius: 22px;
+  padding: 22px;
+  margin-top: 16px;
+}
+
+.result h2 {
+  font-size: 30px;
+  margin: 0 0 8px;
+}
+
+.toplist {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button {
+  width: 100%;
+  min-height: 50px;
+  border: none;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 700;
+  background: #34c759;
+  color: white;
+  margin-top: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🏠 MFH-Gewerkebewertung</h1>
-<div class="subtitle">6-Parteien-Mehrfamilienhaus</div>
+<h1>🌴 Urlaubsfinder</h1>
+<div class="subtitle">Schieber + Kontinent auswählen</div>
 
-<div class="summary" id="summary">
-  Noch keine Bewertung vorhanden.
+<div class="card">
+  <label>🌍 Kontinente auswählen</label>
+  <div class="checkbox-grid">
+    <label><input type="checkbox" value="Europa" checked onchange="berechnen()">Europa</label>
+    <label><input type="checkbox" value="Nordamerika" checked onchange="berechnen()">Nordamerika</label>
+    <label><input type="checkbox" value="Südamerika" checked onchange="berechnen()">Südamerika</label>
+    <label><input type="checkbox" value="Asien" checked onchange="berechnen()">Asien</label>
+    <label><input type="checkbox" value="Afrika" checked onchange="berechnen()">Afrika</label>
+    <label><input type="checkbox" value="Ozeanien" checked onchange="berechnen()">Ozeanien</label>
+  </div>
 </div>
 
-<div id="app"></div>
+<div class="card">
+  <label>💰 Geld / Budget <span class="value" id="vBudget">5</span></label>
+  <input type="range" id="budget" min="1" max="10" value="5" oninput="berechnen()">
+</div>
 
-<button class="action" onclick="auswertungAnzeigen()">Auswertung anzeigen</button>
-<button class="action clear" onclick="allesZuruecksetzen()">Bewertung zurücksetzen</button>
+<div class="card">
+  <label>🌍 Exotisches Ziel <span class="value" id="vExotik">5</span></label>
+  <input type="range" id="exotik" min="1" max="10" value="5" oninput="berechnen()">
+</div>
+
+<div class="card">
+  <label>🌊 Meerblick <span class="value" id="vMeer">5</span></label>
+  <input type="range" id="meer" min="1" max="10" value="5" oninput="berechnen()">
+</div>
+
+<div class="card">
+  <label>💎 Exklusivität <span class="value" id="vLuxus">5</span></label>
+  <input type="range" id="luxus" min="1" max="10" value="5" oninput="berechnen()">
+</div>
+
+<div class="card">
+  <label>🧘 Erholung <span class="value" id="vErholung">5</span></label>
+  <input type="range" id="erholung" min="1" max="10" value="5" oninput="berechnen()">
+</div>
+
+<div id="ergebnis"></div>
+
+<button onclick="zufall()">🎲 Überrasch mich</button>
 
 <script>
-const gewerke = [
-  "Dach",
-  "Dachrinnen / Fallrohre",
-  "Fassade",
-  "Fenster",
-  "Haustüre",
-  "Wohnungstüren",
-  "Keller",
-  "Waschkeller",
-  "Treppenhaus",
-  "Balkone",
-  "Vorgarten",
-  "Außenanlagen",
-  "Einfahrt / Stellplätze",
-  "Briefkastenanlage",
-  "Klingelanlage",
-  "Elektroinstallation",
-  "Heizung",
-  "Wasserleitungen",
-  "Abwasserleitungen",
-  "Bäder",
-  "Küchenanschlüsse",
-  "Brandschutz",
-  "Beleuchtung",
-  "Müllplatz",
-  "Garten / Grünflächen"
-];
+const ziele = [
+  // Europa
+  ["Dänemark Ferienhaus", "Europa", "2.000 €", "Fähre buchen, Auto packen", 5,2,8,4,8],
+  ["Holland am Meer", "Europa", "1.200 €", "Unterkunft buchen, Auto packen", 3,2,9,3,7],
+  ["Mallorca Finca", "Europa", "3.500 €", "Flug, Mietwagen, Finca buchen", 6,4,8,6,8],
+  ["Azoren", "Europa", "4.500 €", "Flug, Mietwagen, Whale Watching buchen", 7,7,9,5,9],
+  ["Griechenland Insel", "Europa", "4.000 €", "Flug, Hotel, Fähre prüfen", 7,6,10,6,9],
+  ["Kroatien Küste", "Europa", "2.800 €", "Route planen, Unterkunft buchen", 5,4,9,5,7],
+  ["Sylt", "Europa", "4.500 €", "Unterkunft buchen, Restaurants reservieren", 8,2,9,8,7],
+  ["Toskana", "Europa", "3.200 €", "Ferienhaus buchen, Auto packen", 6,4,4,6,8],
+  ["Norwegen Fjord", "Europa", "4.000 €", "Fähre buchen, Route planen", 7,6,7,4,8],
+  ["Südfrankreich", "Europa", "3.000 €", "Unterkunft und Strandorte planen", 6,4,8,7,8],
 
-let bewertungen = JSON.parse(localStorage.getItem("bewertungenMFH")) || {};
+  // Nordamerika
+  ["Hawaii", "Nordamerika", "10.000 €", "Flüge, ESTA, Hotel, Mietwagen buchen", 10,10,10,8,9],
+  ["Florida Keys", "Nordamerika", "7.000 €", "Flüge, Mietwagen, Hotels buchen", 8,8,10,7,8],
+  ["Kalifornien Roadtrip", "Nordamerika", "8.000 €", "Flüge, Mietwagen, Route planen", 9,7,8,7,6],
+  ["Kanada Seen", "Nordamerika", "6.500 €", "Flüge, Camper oder Lodge buchen", 8,6,6,5,9],
+  ["New York", "Nordamerika", "5.500 €", "Flüge, Hotel, ESTA buchen", 8,6,2,8,3],
 
-function renderApp() {
-  const app = document.getElementById("app");
-  app.innerHTML = "";
+  // Südamerika
+  ["Costa Rica", "Südamerika", "6.000 €", "Flüge, Mietwagen, Lodges buchen", 8,9,8,6,8],
+  ["Brasilien Küste", "Südamerika", "6.500 €", "Flüge, Hotels, Transfers buchen", 8,9,9,6,7],
+  ["Patagonien", "Südamerika", "7.000 €", "Flüge, Route, Outdoor-Ausrüstung planen", 9,9,4,5,7],
+  ["Peru", "Südamerika", "5.500 €", "Flüge, Rundreise, Höhe beachten", 7,9,2,5,6],
+  ["Galapagos", "Südamerika", "10.000 €", "Flüge, Kreuzfahrt, Genehmigungen buchen", 10,10,10,9,8],
 
-  gewerke.forEach(gewerk => {
-    const wert = bewertungen[gewerk]?.status || "";
-    const notiz = bewertungen[gewerk]?.notiz || "";
+  // Asien
+  ["Bali", "Asien", "6.500 €", "Flüge, Villa, Fahrer buchen", 8,10,8,7,9],
+  ["Thailand", "Asien", "5.500 €", "Flüge, Hotels, Impfungen prüfen", 8,10,9,6,8],
+  ["Japan", "Asien", "7.500 €", "Flüge, Hotels, Railpass prüfen", 9,9,3,8,5],
+  ["Dubai", "Asien", "6.000 €", "Flüge und Hotel buchen", 8,8,7,10,6],
+  ["Malediven", "Asien", "9.000 €", "Flüge, Resort, Transfer buchen", 10,10,10,10,10],
 
-    app.innerHTML += `
-      <div class="card">
-        <div class="gewerk-title">${gewerk}</div>
+  // Afrika
+  ["Marokko", "Afrika", "3.500 €", "Flüge, Riad, Mietwagen buchen", 6,8,4,6,6],
+  ["Südafrika", "Afrika", "7.000 €", "Flüge, Mietwagen, Lodges buchen", 9,9,7,7,7],
+  ["Sansibar", "Afrika", "6.500 €", "Flüge, Strandhotel, Impfungen prüfen", 8,10,10,7,9],
+  ["Ägypten Rotes Meer", "Afrika", "3.000 €", "Hotel, Flug, Transfer buchen", 5,6,10,5,8],
+  ["Mauritius", "Afrika", "7.500 €", "Flüge, Resort, Mietwagen buchen", 9,9,10,8,9],
 
-        <div class="buttons">
-          <button class="okay ${wert === "Okay" ? "active" : ""}" 
-            onclick="bewerten('${gewerk}', 'Okay')">Okay</button>
+  // Ozeanien
+  ["Australien Ostküste", "Ozeanien", "10.000 €", "Flüge, Camper, Route planen", 10,10,9,7,6],
+  ["Neuseeland", "Ozeanien", "10.000 €", "Flüge, Camper, Route buchen", 10,10,7,6,8],
+  ["Fidschi", "Ozeanien", "9.500 €", "Flüge, Inselresort, Transfers buchen", 10,10,10,9,10],
+  ["Tahiti", "Ozeanien", "11.000 €", "Flüge, Resort, Inselhopping buchen", 10,10,10,10,10],
+  ["Cook Islands", "Ozeanien", "10.000 €", "Flüge, Unterkunft, Transfers buchen", 10,10,10,8,10]
+].map(z => ({
+  name: z[0],
+  kontinent: z[1],
+  kosten: z[2],
+  todo: z[3],
+  budget: z[4],
+  exotik: z[5],
+  meer: z[6],
+  luxus: z[7],
+  erholung: z[8]
+}));
 
-          <button class="mittel ${wert === "Mittelmäßig" ? "active" : ""}" 
-            onclick="bewerten('${gewerk}', 'Mittelmäßig')">Mittelmäßig</button>
+function gewaehlteKontinente() {
+  return Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+    .map(cb => cb.value);
+}
 
-          <button class="muss ${wert === "Muss gemacht werden" ? "active" : ""}" 
-            onclick="bewerten('${gewerk}', 'Muss gemacht werden')">Muss gemacht werden</button>
+function berechnen() {
+  const wunsch = {
+    budget: Number(document.getElementById("budget").value),
+    exotik: Number(document.getElementById("exotik").value),
+    meer: Number(document.getElementById("meer").value),
+    luxus: Number(document.getElementById("luxus").value),
+    erholung: Number(document.getElementById("erholung").value)
+  };
 
-          <button class="dringend ${wert === "Dringend" ? "active" : ""}" 
-            onclick="bewerten('${gewerk}', 'Dringend')">Dringend</button>
-        </div>
+  document.getElementById("vBudget").innerText = wunsch.budget;
+  document.getElementById("vExotik").innerText = wunsch.exotik;
+  document.getElementById("vMeer").innerText = wunsch.meer;
+  document.getElementById("vLuxus").innerText = wunsch.luxus;
+  document.getElementById("vErholung").innerText = wunsch.erholung;
 
-        <textarea 
-          placeholder="Notiz, Mangel, geschätzte Kosten..."
-          oninput="notizSpeichern('${gewerk}', this.value)"
-        >${notiz}</textarea>
+  const kontinente = gewaehlteKontinente();
+
+  if (kontinente.length === 0) {
+    document.getElementById("ergebnis").innerHTML = `
+      <div class="result">
+        <h2>Kein Kontinent gewählt</h2>
+        Bitte mindestens einen Kontinent auswählen.
+      </div>`;
+    return;
+  }
+
+  const gefiltert = ziele.filter(z => kontinente.includes(z.kontinent));
+
+  const bewertet = gefiltert.map(ziel => {
+    let abweichung =
+      Math.abs(wunsch.budget - ziel.budget) +
+      Math.abs(wunsch.exotik - ziel.exotik) +
+      Math.abs(wunsch.meer - ziel.meer) +
+      Math.abs(wunsch.luxus - ziel.luxus) +
+      Math.abs(wunsch.erholung - ziel.erholung);
+
+    let score = Math.max(0, 100 - abweichung * 4);
+
+    return { ...ziel, score };
+  });
+
+  bewertet.sort((a, b) => b.score - a.score);
+
+  const bestesZiel = bewertet[0];
+  const top5 = bewertet.slice(0, 5);
+
+  let topliste = "";
+  top5.forEach((z, i) => {
+    topliste += `${i + 1}. ${z.name} (${z.kontinent}) – ${z.score}%<br>`;
+  });
+
+  document.getElementById("ergebnis").innerHTML = `
+    <div class="result">
+      <div>Bestes Ziel:</div>
+      <h2>${bestesZiel.name}</h2>
+      <div><strong>Kontinent:</strong> ${bestesZiel.kontinent}</div>
+      <div><strong>Kosten:</strong> ${bestesZiel.kosten}</div>
+      <div><strong>To-do:</strong> ${bestesZiel.todo}</div>
+      <br>
+      <div>Passgenauigkeit: ${bestesZiel.score}%</div>
+      <div class="toplist">
+        <strong>Top 5:</strong><br>
+        ${topliste}
       </div>
-    `;
-  });
-
-  auswertungAktualisieren();
-}
-
-function bewerten(gewerk, status) {
-  if (!bewertungen[gewerk]) {
-    bewertungen[gewerk] = {};
-  }
-
-  bewertungen[gewerk].status = status;
-  speichern();
-  renderApp();
-}
-
-function notizSpeichern(gewerk, text) {
-  if (!bewertungen[gewerk]) {
-    bewertungen[gewerk] = {};
-  }
-
-  bewertungen[gewerk].notiz = text;
-  speichern();
-  auswertungAktualisieren();
-}
-
-function speichern() {
-  localStorage.setItem("bewertungenMFH", JSON.stringify(bewertungen));
-}
-
-function auswertungAktualisieren() {
-  let okay = 0;
-  let mittel = 0;
-  let muss = 0;
-  let dringend = 0;
-
-  Object.values(bewertungen).forEach(b => {
-    if (b.status === "Okay") okay++;
-    if (b.status === "Mittelmäßig") mittel++;
-    if (b.status === "Muss gemacht werden") muss++;
-    if (b.status === "Dringend") dringend++;
-  });
-
-  document.getElementById("summary").innerHTML = `
-    <strong>Zwischenstand</strong>
-    <div>✅ Okay: ${okay}</div>
-    <div>🟡 Mittelmäßig: ${mittel}</div>
-    <div>🟠 Muss gemacht werden: ${muss}</div>
-    <div>🔴 Dringend: ${dringend}</div>
+    </div>
   `;
 }
 
-function auswertungAnzeigen() {
-  let text = "Auswertung MFH-Gewerkebewertung\\n\\n";
-
-  gewerke.forEach(g => {
-    const b = bewertungen[g];
-    if (b && b.status) {
-      text += `${g}: ${b.status}\\n`;
-      if (b.notiz) text += `Notiz: ${b.notiz}\\n`;
-      text += "\\n";
-    }
+function zufall() {
+  ["budget", "exotik", "meer", "luxus", "erholung"].forEach(id => {
+    document.getElementById(id).value = Math.floor(Math.random() * 10) + 1;
   });
-
-  alert(text);
+  berechnen();
 }
 
-function allesZuruecksetzen() {
-  if (confirm("Wirklich alles löschen?")) {
-    localStorage.removeItem("bewertungenMFH");
-    bewertungen = {};
-    renderApp();
-  }
-}
-
-renderApp();
+berechnen();
 </script>
 
 </body>
