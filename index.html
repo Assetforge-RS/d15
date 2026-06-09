@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MFH Gewerkebewertung</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f2f2f7;
+  color: #1c1c1e;
+}
+
+h1 {
+  font-size: 26px;
+  margin: 10px 0 4px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.gewerk-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+button {
+  min-height: 48px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  background: #e5e5ea;
+}
+
+button.active.okay { background: #34c759; color: white; }
+button.active.mittel { background: #ffcc00; color: #1c1c1e; }
+button.active.muss { background: #ff9500; color: white; }
+button.active.dringend { background: #ff3b30; color: white; }
+
+textarea {
+  width: 100%;
+  min-height: 70px;
+  margin-top: 12px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.summary {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #007aff;
+  color: white;
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.summary div {
+  margin: 4px 0;
+}
+
+.action {
+  width: 100%;
+  background: #007aff;
+  color: white;
+  margin-top: 10px;
+}
+
+.clear {
+  background: #8e8e93;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🏠 MFH-Gewerkebewertung</h1>
+<div class="subtitle">6-Parteien-Mehrfamilienhaus</div>
+
+<div class="summary" id="summary">
+  Noch keine Bewertung vorhanden.
+</div>
+
+<div id="app"></div>
+
+<button class="action" onclick="auswertungAnzeigen()">Auswertung anzeigen</button>
+<button class="action clear" onclick="allesZuruecksetzen()">Bewertung zurücksetzen</button>
+
+<script>
+const gewerke = [
+  "Dach",
+  "Dachrinnen / Fallrohre",
+  "Fassade",
+  "Fenster",
+  "Haustüre",
+  "Wohnungstüren",
+  "Keller",
+  "Waschkeller",
+  "Treppenhaus",
+  "Balkone",
+  "Vorgarten",
+  "Außenanlagen",
+  "Einfahrt / Stellplätze",
+  "Briefkastenanlage",
+  "Klingelanlage",
+  "Elektroinstallation",
+  "Heizung",
+  "Wasserleitungen",
+  "Abwasserleitungen",
+  "Bäder",
+  "Küchenanschlüsse",
+  "Brandschutz",
+  "Beleuchtung",
+  "Müllplatz",
+  "Garten / Grünflächen"
+];
+
+let bewertungen = JSON.parse(localStorage.getItem("bewertungenMFH")) || {};
+
+function renderApp() {
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+
+  gewerke.forEach(gewerk => {
+    const wert = bewertungen[gewerk]?.status || "";
+    const notiz = bewertungen[gewerk]?.notiz || "";
+
+    app.innerHTML += `
+      <div class="card">
+        <div class="gewerk-title">${gewerk}</div>
+
+        <div class="buttons">
+          <button class="okay ${wert === "Okay" ? "active" : ""}" 
+            onclick="bewerten('${gewerk}', 'Okay')">Okay</button>
+
+          <button class="mittel ${wert === "Mittelmäßig" ? "active" : ""}" 
+            onclick="bewerten('${gewerk}', 'Mittelmäßig')">Mittelmäßig</button>
+
+          <button class="muss ${wert === "Muss gemacht werden" ? "active" : ""}" 
+            onclick="bewerten('${gewerk}', 'Muss gemacht werden')">Muss gemacht werden</button>
+
+          <button class="dringend ${wert === "Dringend" ? "active" : ""}" 
+            onclick="bewerten('${gewerk}', 'Dringend')">Dringend</button>
+        </div>
+
+        <textarea 
+          placeholder="Notiz, Mangel, geschätzte Kosten..."
+          oninput="notizSpeichern('${gewerk}', this.value)"
+        >${notiz}</textarea>
+      </div>
+    `;
+  });
+
+  auswertungAktualisieren();
+}
+
+function bewerten(gewerk, status) {
+  if (!bewertungen[gewerk]) {
+    bewertungen[gewerk] = {};
+  }
+
+  bewertungen[gewerk].status = status;
+  speichern();
+  renderApp();
+}
+
+function notizSpeichern(gewerk, text) {
+  if (!bewertungen[gewerk]) {
+    bewertungen[gewerk] = {};
+  }
+
+  bewertungen[gewerk].notiz = text;
+  speichern();
+  auswertungAktualisieren();
+}
+
+function speichern() {
+  localStorage.setItem("bewertungenMFH", JSON.stringify(bewertungen));
+}
+
+function auswertungAktualisieren() {
+  let okay = 0;
+  let mittel = 0;
+  let muss = 0;
+  let dringend = 0;
+
+  Object.values(bewertungen).forEach(b => {
+    if (b.status === "Okay") okay++;
+    if (b.status === "Mittelmäßig") mittel++;
+    if (b.status === "Muss gemacht werden") muss++;
+    if (b.status === "Dringend") dringend++;
+  });
+
+  document.getElementById("summary").innerHTML = `
+    <strong>Zwischenstand</strong>
+    <div>✅ Okay: ${okay}</div>
+    <div>🟡 Mittelmäßig: ${mittel}</div>
+    <div>🟠 Muss gemacht werden: ${muss}</div>
+    <div>🔴 Dringend: ${dringend}</div>
+  `;
+}
+
+function auswertungAnzeigen() {
+  let text = "Auswertung MFH-Gewerkebewertung\\n\\n";
+
+  gewerke.forEach(g => {
+    const b = bewertungen[g];
+    if (b && b.status) {
+      text += `${g}: ${b.status}\\n`;
+      if (b.notiz) text += `Notiz: ${b.notiz}\\n`;
+      text += "\\n";
+    }
+  });
+
+  alert(text);
+}
+
+function allesZuruecksetzen() {
+  if (confirm("Wirklich alles löschen?")) {
+    localStorage.removeItem("bewertungenMFH");
+    bewertungen = {};
+    renderApp();
+  }
+}
+
+renderApp();
+</script>
+
+</body>
+</html>
